@@ -3,6 +3,11 @@
 #include "resource.h"
 #include "SysMets.h"
 
+#ifndef UNICODE
+#define UNICODE
+#endif // !UNICODE
+
+
 #define SZTIMELEN				256
 
 #define LIST_ID					100

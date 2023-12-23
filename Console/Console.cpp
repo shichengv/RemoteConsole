@@ -3,7 +3,7 @@
 
 #include "framework.h"
 #include "Console.h"
-#include "WrapperSocket.h"
+#include "WrapperServerSocket.h"
 
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "Comctl32.lib")
@@ -44,8 +44,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	WNDCLASS		wndclass = {};
 
 	HInstance = hInstance;
-
-	InitSocket();
 
 	wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_HREDRAW;
 	wndclass.lpfnWndProc = MainWndProc;

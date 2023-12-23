@@ -1,24 +1,26 @@
 #include "framework.h"
 #include "Console.h"
-#include "WrapperSocket.h"
+#include "WrapperServerSocket.h"
+
+#define SERVER_LOG			TEXT("server_log.txt")
 
 extern HWND hwndMainWnd;
 extern TCHAR szTime[SZTIMELEN];
 extern SYSTEMTIME st;
 
-extern HANDLE hServerLogFile;
+static HANDLE hServerLogFile;
 
 DWORD dwBytesWritten;
 DWORD dwBytesToWrite;
 
 static TCHAR Buffer[8192];
 
-void UpdateServerLogFile(HANDLE hFile, const TCHAR szMsg[], SYSTEMTIME* st) {
+void UpdateServerLogFile(const TCHAR szMsg[]) {
 
-	GetSystemTime(st);
-	GetTimeFormat(LOCALE_USER_DEFAULT, 0, st, NULL, szTime, SZTIMELEN);
+	GetSystemTime(&st);
+	GetTimeFormat(LOCALE_USER_DEFAULT, 0, &st, NULL, szTime, SZTIMELEN);
 	_stprintf_s(Buffer, TEXT("%s\t%s...\n"), szTime, szMsg);
-	dwBytesToWrite = _tcsclen(Buffer);
+	dwBytesToWrite = _tcsclen(Buffer) * sizeof(TCHAR);
 	BOOL bErrorFlag = WriteFile(hServerLogFile, Buffer, dwBytesToWrite, &dwBytesWritten, NULL);
 	if (FALSE == bErrorFlag)
 		MessageBox(hwndMainWnd, TEXT("Terminal failure: Unable to write to file."), TEXT("WriteServerLogFile"), MB_OK);
@@ -34,6 +36,7 @@ void UpdateServerLogFile(HANDLE hFile, const TCHAR szMsg[], SYSTEMTIME* st) {
 		}
 		else
 		{
+			FlushFileBuffers(hServerLogFile);
 			return;
 		}
 	}
@@ -43,12 +46,30 @@ void UpdateServerLogFile(HANDLE hFile, const TCHAR szMsg[], SYSTEMTIME* st) {
 void DebugSocketLog(const TCHAR* LogStr) {
 	
 	_stprintf_s(Buffer, TEXT("%s %-5d\n"), LogStr, WSAGetLastError());
-	UpdateServerLogFile(hServerLogFile, Buffer, &st);
+	MessageBox(hwndMainWnd, Buffer, TEXT("Socket"), MB_OK);
+	UpdateServerLogFile(Buffer);
 
 }
 
 BOOL InitSocket() {
 	WSADATA wsaData;
+	
+	hServerLogFile = CreateFile(
+		SERVER_LOG,             // name of the write
+		GENERIC_WRITE,          // open for writing
+		FILE_SHARE_READ,        // read share
+		NULL,                   // default security
+		CREATE_ALWAYS,          // create new file only
+		FILE_ATTRIBUTE_NORMAL,  // normal file
+		NULL);                  // no attr. template
+
+	if (hServerLogFile == INVALID_HANDLE_VALUE)
+	{
+		_stprintf_s(Buffer, TEXT("Terminal failure: Unable to open file \"%s\" for write.\n"), SERVER_LOG);
+		MessageBox(hwndMainWnd, Buffer, TEXT("CreateFile"), MB_OK);
+		return 0;
+	}
+
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData))
 	{
 		DebugSocketLog(TEXT("InitSocket() -> WSAStartup() error"));
@@ -59,7 +80,8 @@ BOOL InitSocket() {
 
 void CleanSocket() {
 	WSACleanup();
-	CloseHandle(hServerLogFile);
+	if (hServerLogFile != INVALID_HANDLE_VALUE)
+		CloseHandle(hServerLogFile);
 }
 
 SOCKET OpenListenSocket(PCSTR Port) {

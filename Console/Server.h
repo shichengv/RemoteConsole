@@ -1,11 +1,11 @@
 #pragma once
 #include "framework.h"
-#include "WrapperSocket.h"
+#include "WrapperServerSocket.h"
 #include "Console.h"
 
 #define DEFAULT_PORT				"17777"
 
-#define HOSTNAMELEN					64
+#define HOSTNAMELEN					(NI_MAXHOST + 2 + NI_MAXSERV)
 #define ALIASLEN					64
 
 #define HASHCOUNT				31

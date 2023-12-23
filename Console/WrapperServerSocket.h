@@ -5,7 +5,7 @@
 #define LISTENQ			5
 
 void DebugSocketLog(const TCHAR* LogStr);
-void UpdateServerLogFile(HANDLE hFile, const TCHAR szMsg[], SYSTEMTIME* st);
+void UpdateServerLogFile(const TCHAR szMsg[]);
 BOOL InitSocket();
 void CleanSocket();
 SOCKET OpenListenSocket(PCSTR Port);

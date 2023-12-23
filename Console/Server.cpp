@@ -1,15 +1,13 @@
 #include "framework.h"
 #include "Console.h"
 #include "Server.h"
-#include "WrapperSocket.h"
+#include "WrapperServerSocket.h"
 
 
 extern SOCKET ServerSocket;
 extern SYSTEMTIME st;
 extern TCHAR szTime[SZTIMELEN];
 extern HWND hwndMainWnd;
-
-HANDLE hServerLogFile;
 
 static int key = 0;
 static TCHAR Buffer[8192];
@@ -41,34 +39,14 @@ DWORD WINAPI ListConnectedClients(LPVOID lpParameter) {
 	/*	指向客户实体对象	*/
 	Client* pCAcceptClient;
 
-	TCHAR szFileName[SZTIMELEN] = { };
-
-	_stprintf_s(szFileName, TEXT("server_log.txt"));
-
-	hServerLogFile = CreateFile(
-		szFileName,             // name of the write
-		GENERIC_WRITE,          // open for writing
-		0,                      // do not share
-		NULL,                   // default security
-		CREATE_NEW,             // create new file only
-		FILE_ATTRIBUTE_NORMAL,  // normal file
-		NULL);                  // no attr. template
-
-	if (hServerLogFile == INVALID_HANDLE_VALUE)
-	{
-		_stprintf_s(Buffer, TEXT("Terminal failure: Unable to open file \"%s\" for write.\n"), szFileName);
-		MessageBox(hwndMainWnd, Buffer, TEXT("CreateFile"), MB_OK);
-		return 0;
-	}
-
-	UpdateServerLogFile(hServerLogFile, TEXT("开始监听"), &st);
+	UpdateServerLogFile(TEXT("开始监听"));
 
 	ServerSocket = OpenListenSocket(DEFAULT_PORT);
 	while (1)
 	{
 		ClientSocket = accept(ServerSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
 		if (ClientSocket == INVALID_SOCKET) {
-			DebugSocketLog(TEXT("Accept Faild:"));
+			DebugSocketLog(TEXT("Accept Failed:"));
 			continue;
 		}
 
@@ -84,15 +62,16 @@ DWORD WINAPI ListConnectedClients(LPVOID lpParameter) {
 		MultiByteToWideChar(CP_UTF8, 0, clientHost, cSize, wClientHost, HOSTNAMELEN);
 		cSize = strlen(clientService) + 1;
 		MultiByteToWideChar(CP_UTF8, 0, clientService, cSize, wClientService, HOSTNAMELEN);
-		_stprintf_s(Buffer, TEXT("%s:%s"), wClientHost, wClientService);
+		_stprintf_s(Buffer, TEXT(":%s"), wClientService);
+		_tcscat_s(wClientHost, Buffer);
 
 		/*	新建一个对象，并存储到HashTable中	*/
 		pCAcceptClient = new Client;
-		pCAcceptClient->Initilize(ClientSocket, ++key, Buffer, TEXT(" "), pCAcceptClient);
+		pCAcceptClient->Initilize(ClientSocket, ++key, wClientHost, TEXT(" "), pCAcceptClient);
 		htClients.Insert(key, pCAcceptClient);
-		_stprintf_s(Buffer, TEXT("接受连接：%s"), Buffer);
-		DebugSocketLog(Buffer);
-		SendMessage(hwndChild, LB_ADDSTRING, 0, (LPARAM)Buffer);
+		_stprintf_s(Buffer, TEXT("接受连接：%s"), wClientHost);
+		UpdateServerLogFile(Buffer);
+		SendMessage(hwndChild, LB_ADDSTRING, 0, (LPARAM)wClientHost);
 
 	}
 

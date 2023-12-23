@@ -133,14 +133,14 @@
     <ClInclude Include="Server.h" />
     <ClInclude Include="SysMets.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="WrapperSocket.h" />
+    <ClInclude Include="WrapperServerSocket.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChildWndProc.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="MainWndProc.cpp" />
     <ClCompile Include="Server.cpp" />
-    <ClCompile Include="WrapperSocket.cpp" />
+    <ClCompile Include="WrapperServerSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Console.rc" />

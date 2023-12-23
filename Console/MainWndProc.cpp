@@ -1,6 +1,6 @@
 #include "framework.h"
 #include "Console.h"
-#include "WrapperSocket.h"
+#include "WrapperServerSocket.h"
 #include "Server.h"
 
 extern HFONT hFont;
@@ -43,7 +43,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 		hFont = CreateFont(20, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, GB2312_CHARSET,
 			OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, TEXT("微软雅黑"));
 		if (!hFont) {
-			MessageBox(hwnd, TEXT("未找到\"微软雅黑\"字体，将使用默认字体。"), TEXT("警告"), MB_OK);
+			MessageBox(hwnd, TEXT("未找到\"微软雅黑\"字体，将使用默认字体。"), ALERT, MB_OK);
 			DeleteObject(hFont);
 		}
 		SelectObject(hdc, hFont);
@@ -105,6 +105,8 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 		AppendMenu(hMenuListBoxItem, MF_STRING, IDM_OPEN, TEXT("打开控制台"));
 
 		SetWindowSubclass(hwndListBox, ListWndProc, 0, 0);
+
+		InitSocket();
 		CreateThread(NULL, 0, ListConnectedClients, (LPVOID)hwndListBox, 0, NULL);
 	}
 	return 0;
@@ -153,8 +155,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 
 	case WM_CLOSE:
 	{
-		DeleteObject(hFont);
-		CleanSocket();
 		DestroyWindow(hwnd);
 	}
 	return 0;
