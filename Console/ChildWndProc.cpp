@@ -10,6 +10,8 @@ extern int iMaxWidth;
 
 static int cxChild, cyChild;
 
+TCHAR DebugConsoleBuffer[OUTPUTSIZE];
+
 LRESULT CALLBACK ListWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
 	UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
 	switch (message)
@@ -41,6 +43,21 @@ LRESULT CALLBACK ListWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 	}
 
 	return DefSubclassProc(hwnd, message, wParam, lParam);
+
+}
+extern LRESULT CALLBACK DebugConsoleWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
+	UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+
+	switch (message)
+	{
+	//case WM_USER: // user-defined message
+	//	// Update the text of the child window using SetWindowText
+	//	SetWindowText(hwnd, (LPCWSTR)lParam);
+	//	break;
+	default:
+		return DefWindowProc(hwnd, message, wParam, lParam);
+	}
+	return 0;
 
 }
 

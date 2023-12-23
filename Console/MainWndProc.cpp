@@ -8,16 +8,18 @@ extern HFONT hFont;
 extern HWND hwndListBox;
 extern HWND hwndRemoteConsole;
 extern HWND hwndRemoteConsoleEdit;
-extern HWND hwndLConsole;
-extern HWND hwndLConsoleEdit;
+extern HWND hwndDebugOutput;
 
 extern HINSTANCE HInstance;
 
 extern HMENU hMenuListBoxItem;	// Pop-up menu handle
 
 extern TCHAR	szConsoleClass[];
+extern TCHAR	szDebugConsoleClass[];
 
 extern LRESULT CALLBACK ListWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, 
+	UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
+extern LRESULT CALLBACK DebugConsoleWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
 	UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 extern DWORD WINAPI ListConnectedClients(LPVOID lpParameter);
 
@@ -66,11 +68,12 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 			ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_BORDER,
 			0, 0, 0, 0,
 			hwnd, (HMENU)REMOTECONSOLE_ID, HInstance, NULL);
-		hwndLConsole = CreateWindow(szConsoleClass, TEXT("本地控制台"),
-			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE |
-			ES_AUTOVSCROLL | ES_AUTOHSCROLL | WS_BORDER,
+
+		hwndDebugOutput = CreateWindow(TEXT("static"), NULL,
+			WS_CHILDWINDOW | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_BORDER | SS_LEFT,
+			//ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_MULTILINE,
 			0, 0, 0, 0,
-			hwnd, (HMENU)LCONSOLE_ID, HInstance, NULL);
+			hwnd, (HMENU)DEBUGOUTPUT_ID, HInstance, NULL);
 
 		hwndRemoteConsoleEdit = CreateWindowEx(
 			WS_EX_CLIENTEDGE, // extended style
@@ -84,27 +87,17 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 			NULL // additional data
 		);
 
-		hwndLConsoleEdit = CreateWindowEx(
-			WS_EX_CLIENTEDGE, // extended style
-			TEXT("EDIT"), // class name
-			TEXT(""), // initial text
-			WS_CHILD | WS_VISIBLE | WS_BORDER | ES_LEFT | ES_AUTOHSCROLL, // style
-			0, 0, 0, 0,
-			hwnd, // parent window handle
-			(HMENU)LCONSOLE_EDIT_ID, // control ID
-			HInstance,
-			NULL // additional data
-		);
 
 		SendMessage(hwndListBox, WM_SETFONT, (WPARAM)hFont, TRUE);
 		SendMessage(hwndRemoteConsoleEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
-		SendMessage(hwndLConsoleEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
+		SendMessage(hwndDebugOutput, WM_SETFONT, (WPARAM)hFont, TRUE);
 
 		hMenuListBoxItem = CreatePopupMenu();
 		AppendMenu(hMenuListBoxItem, MF_STRING, IDM_DELETE, TEXT("删除该项"));
 		AppendMenu(hMenuListBoxItem, MF_STRING, IDM_OPEN, TEXT("打开控制台"));
 
 		SetWindowSubclass(hwndListBox, ListWndProc, 0, 0);
+		//SetWindowSubclass(hwndDebugOutput, DebugConsoleWndProc, 0, 0);
 
 		InitSocket();
 		CreateThread(NULL, 0, ListConnectedClients, (LPVOID)hwndListBox, 0, NULL);
@@ -118,8 +111,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 		MoveWindow(hwndListBox, 0, 0, cxClient / 4, cyClient + 6, TRUE);
 		MoveWindow(hwndRemoteConsole, cxClient / 4, 0, cxClient / 4 * 3, cyClient / 3 * 2 - cyChar - 10, TRUE);
 		MoveWindow(hwndRemoteConsoleEdit, cxClient / 4, cyClient / 3 * 2 - cyChar - 10, cxClient / 4 * 3, cyChar + 10, TRUE);
-		MoveWindow(hwndLConsole, cxClient / 4, cyClient / 3 * 2, cxClient / 4 * 3, cyClient / 3 - cyChar - 10, TRUE);
-		MoveWindow(hwndLConsoleEdit, cxClient / 4, cyClient - cyChar - 10, cxClient / 4 * 3, cyChar + 10, TRUE);
+		MoveWindow(hwndDebugOutput, cxClient / 4, cyClient / 3 * 2, cxClient / 4 * 3, cyClient / 3 + 2, TRUE);
 
 	}
 	return 0;

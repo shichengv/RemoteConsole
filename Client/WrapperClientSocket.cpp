@@ -51,7 +51,6 @@ BOOL InitSocket() {
 		FILE_ATTRIBUTE_NORMAL,  // normal file
 		NULL);                  // no attr. template
 
-
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData))
 	{
 		DebugSocketLog(TEXT("InitSocket() -> WSAStartup() error"));

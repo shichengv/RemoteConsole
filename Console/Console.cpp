@@ -16,8 +16,7 @@ HWND hwndMainWnd;
 HWND hwndListBox;
 HWND hwndRemoteConsole;
 HWND hwndRemoteConsoleEdit;
-HWND hwndLConsole;
-HWND hwndLConsoleEdit;
+HWND hwndDebugOutput;
 
 HMENU hMenuListBoxItem;	// Pop-up menu handle
 
@@ -28,9 +27,12 @@ TCHAR szTime[SZTIMELEN];
 
 TCHAR	szAppName[] = TEXT("MainWnd");
 TCHAR	szConsoleClass[] = TEXT("Console");
+TCHAR	szDebugConsoleClass[] = TEXT("Debug Console");
 
 extern LRESULT CALLBACK MainWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 extern LRESULT CALLBACK ListWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, 
+	UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
+extern LRESULT CALLBACK DebugConsoleWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
 	UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 
 extern LRESULT CALLBACK ConsoleWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);

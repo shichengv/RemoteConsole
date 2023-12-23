@@ -2,9 +2,10 @@
 #include "Console.h"
 #include "WrapperServerSocket.h"
 
-#define SERVER_LOG			TEXT("server_log.txt")
+#define SERVER_LOG			TEXT("..\\x64\\Debug\\server_log.txt")
 
 extern HWND hwndMainWnd;
+extern HWND hwndDebugOutput;
 extern TCHAR szTime[SZTIMELEN];
 extern SYSTEMTIME st;
 
@@ -14,32 +15,38 @@ DWORD dwBytesWritten;
 DWORD dwBytesToWrite;
 
 static TCHAR Buffer[8192];
+extern TCHAR DebugConsoleBuffer[OUTPUTSIZE];
 
 void UpdateServerLogFile(const TCHAR szMsg[]) {
 
 	GetSystemTime(&st);
-	GetTimeFormat(LOCALE_USER_DEFAULT, 0, &st, NULL, szTime, SZTIMELEN);
+	GetTimeFormat(LOCALE_SYSTEM_DEFAULT, 0, &st, NULL, szTime, SZTIMELEN);
 	_stprintf_s(Buffer, TEXT("%s\t%s...\n"), szTime, szMsg);
-	dwBytesToWrite = _tcsclen(Buffer) * sizeof(TCHAR);
-	BOOL bErrorFlag = WriteFile(hServerLogFile, Buffer, dwBytesToWrite, &dwBytesWritten, NULL);
-	if (FALSE == bErrorFlag)
-		MessageBox(hwndMainWnd, TEXT("Terminal failure: Unable to write to file."), TEXT("WriteServerLogFile"), MB_OK);
-	else {
-		if (dwBytesWritten != dwBytesToWrite)
-		{
-			// This is an error because a synchronous write that results in
-			// success (WriteFile returns TRUE) should write all data as
-			// requested. This would not necessarily be the case for
-			// asynchronous writes.
-			MessageBox(hwndMainWnd, TEXT("Error: dwBytesWritten != dwBytesToWrite"), TEXT("WriteServerLogFile"), MB_OK);
-			
-		}
-		else
-		{
-			FlushFileBuffers(hServerLogFile);
-			return;
-		}
-	}
+	_tcsncat_s(DebugConsoleBuffer, Buffer, OUTPUTSIZE - _tcslen(DebugConsoleBuffer) - 1);
+	
+	SetWindowText(hwndDebugOutput, DebugConsoleBuffer);
+	//SendMessage(hwndDebugOutput, WM_SETTEXT, 0, (LPARAM)Buffer);
+
+	//dwBytesToWrite = (DWORD)_tcsclen(Buffer) * sizeof(TCHAR);
+	//BOOL bErrorFlag = WriteFile(hServerLogFile, Buffer, dwBytesToWrite, &dwBytesWritten, NULL);
+	//if (FALSE == bErrorFlag)
+	//	MessageBox(hwndMainWnd, TEXT("Terminal failure: Unable to write to file."), TEXT("WriteServerLogFile"), MB_OK);
+	//else {
+	//	if (dwBytesWritten != dwBytesToWrite)
+	//	{
+	//		// This is an error because a synchronous write that results in
+	//		// success (WriteFile returns TRUE) should write all data as
+	//		// requested. This would not necessarily be the case for
+	//		// asynchronous writes.
+	//		MessageBox(hwndMainWnd, TEXT("Error: dwBytesWritten != dwBytesToWrite"), TEXT("WriteServerLogFile"), MB_OK);
+	//		
+	//	}
+	//	else
+	//	{
+	//		FlushFileBuffers(hServerLogFile);
+	//		return;
+	//	}
+	//}
 
 }
 
